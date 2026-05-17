@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "- This is my first backend project",
   "main": "index.js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon -r dotenv/config src/index.js"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +13,10 @@
   "devDependencies": {
     "nodemon": "^3.1.14",
     "prettier": "^3.8.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.6.2"
   }
 }
