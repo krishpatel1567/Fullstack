@@ -1,6 +1,6 @@
 //used to upload files that are already being uploaded to the server , now needed to br uploaded to the cloud
 import { v2 as cloudinary } from "cloudinary";
-import fs from "fs/promises"
+import fs from "fs"
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -16,13 +16,11 @@ const uploadOnCloudinary = async (localFilePath) => {
             resource_type: "auto"
         })
 
-        await fs.unlink(localFilePath).catch(() => {})
-        
-        fs.unlinkSync(localFilePath)
+        await fs.promises.unlink(localFilePath).catch(() => {})
         return result
     } catch (error) {
-        await fs.unlink(localFilePath).catch(() => {})
-        return null
+        await fs.promises.unlink(localFilePath).catch(() => {})
+        throw error
     }
 }
 export { uploadOnCloudinary }

@@ -9,7 +9,7 @@ const userSchema = new Schema(
             type : String,
             required : true,
             unique : true,
-            lowecase : true,
+            lowercase : true,
             trim : true,
             index : true
         },
@@ -17,7 +17,7 @@ const userSchema = new Schema(
             type : String,
             required : true,
             unique : true,
-            lowecase : true,
+            lowercase : true,
             trim : true
         },
         fullName:{
@@ -43,7 +43,7 @@ const userSchema = new Schema(
             type : String,
             required : true
         },
-        refreshTocken:{
+        refreshToken:{
             type : String
         }
     },
@@ -62,6 +62,8 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 }
 
 userSchema.methods.generateAccessToken = function () {
+    const accessTokenExpiry =process.env.ACCESS_TOKEN_EXPIRY || '15m'
+
     return jwt.sign(
         {
             _id: this._id,
@@ -71,11 +73,13 @@ userSchema.methods.generateAccessToken = function () {
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
-            expiresIn:process.env.ACCESS_TOKEN_EXPIREY
+            expiresIn: accessTokenExpiry
         }
     )
 }
 userSchema.methods.generateRefreshToken = function () {
+    const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY || '7d'
+
     return jwt.sign(
         {
             _id: this._id,
@@ -85,7 +89,7 @@ userSchema.methods.generateRefreshToken = function () {
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
-            expiresIn:process.env.REFRESH_TOKEN_EXPIREY
+            expiresIn: refreshTokenExpiry
         }
     )
 }
