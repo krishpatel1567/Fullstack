@@ -112,17 +112,25 @@ const getVideoById = asyncHandler(async (req, res) => {
         throw error
     }
 
-    const video = await Video.findById(videoId).populate("owner", "username email avatar")
+    const video = await Video.findByIdAndUpdate(
+        videoId,
+        { $inc: { views: 1 } },
+        { new: true }
+    ).populate("owner", "username email avatar");
 
     if (!video) {
         throw error
     }
+    await User.findByIdAndUpdate(req.user._id, {
+        $addToSet: { watchHistory: videoId }
+    })
+    
     return res
         .status(200)
         .json(new ApiResponse(
             200,
-            "video found",
-            video
+            video,
+            "video found"
         ))
 })
 
@@ -170,8 +178,8 @@ const updateVideo = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(
             200,
-            "Video updated succesfully",
-            updatedVideo
+            updatedVideo,
+            "Video updated succesfully"
         ))
 
 })
