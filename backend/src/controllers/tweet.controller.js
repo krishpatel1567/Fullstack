@@ -63,6 +63,34 @@ const getUserTweets = asyncHandler(async (req, res) => {
 
 })
 
+const getAllTweets = asyncHandler(async (req,res) => {
+    const { page = 1, limit = 10 } = req.query
+
+    const matchStage = {
+        $match: {}
+    };
+    const sortStage = { createdAt: -1 };
+
+    const options = {
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
+        sort: sortStage,
+        customLabels: {
+            totalDocs: "totalTweets",
+            docs: "tweets"
+        }
+    };
+
+    const result = await Tweet.aggregatePaginate(
+        Tweet.aggregate([matchStage]),
+        options
+    );
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, result, "Tweets fetched succesfully"))
+})
+
 const updateTweet = asyncHandler(async (req, res) => {
     //TODO: update tweet
     const {tweetId} = req.params
@@ -123,5 +151,6 @@ export {
     createTweet,
     getUserTweets,
     updateTweet,
-    deleteTweet
+    deleteTweet,
+    getAllTweets
 }

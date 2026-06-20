@@ -1,10 +1,10 @@
 import { ApiError } from "../utils/apiError.js"
-import { asyncHandler } from "../utils/assyncHandler.js"
+import { asyncHandler } from "../utils/asyncHandler.js"
 import jwt from "jsonwebtoken"
 import { User } from "../models/user.model.js"
 
 
-export const verifyJWt = asyncHandler(async (req, res, next) => {
+export const verifyJWT = asyncHandler(async (req, res, next) => {
     try {
         const authHeader = req.header("Authorization")
         const tokenFromHeader = authHeader && authHeader.startsWith("Bearer ") 
