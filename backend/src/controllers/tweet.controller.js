@@ -1,8 +1,8 @@
 import mongoose, { isValidObjectId } from "mongoose"
 import { Tweet } from "../models/tweet.model.js"
 import { User } from "../models/user.model.js"
-import { ApiError } from "../utils/ApiError.js"
-import { ApiResponse } from "../utils/ApiResponse.js"
+import { ApiError } from "../utils/apiError.js"
+import { ApiResponse } from "../utils/apiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 
 const createTweet = asyncHandler(async (req, res) => {
@@ -27,7 +27,8 @@ const createTweet = asyncHandler(async (req, res) => {
 
 const getUserTweets = asyncHandler(async (req, res) => {
     // TODO: get user tweets
-    const { page = 1, limit = 10, userId } = req.query
+    const { userId } = req.params
+    const { page = 1, limit = 10 } = req.query
 
     if (!userId) {
         throw new ApiError(400, "userId invalid")

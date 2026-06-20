@@ -1,7 +1,7 @@
 import mongoose, { isValidObjectId } from "mongoose"
 import { Comment } from "../models/comment.model.js"
-import { ApiError } from "../utils/ApiError.js"
-import { ApiResponse } from "../utils/ApiResponse.js"
+import { ApiError } from "../utils/apiError.js"
+import { ApiResponse } from "../utils/apiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { Video } from "../models/video.model.js"
 
@@ -10,7 +10,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     const { page = 1, limit = 10 } = req.query
 
-    if (!videoId && !isValidObjectId(videoId)) throw new ApiError(400, "Invalid video ID")
+    if (!videoId || !isValidObjectId(videoId)) throw new ApiError(400, "Invalid video ID")
 
     const video = await Video.findById(videoId)
 
