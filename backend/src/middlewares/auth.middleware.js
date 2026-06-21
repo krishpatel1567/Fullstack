@@ -31,3 +31,27 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         throw error
     }
 })
+
+export const verifyOptionalJWT = asyncHandler(async (req, res, next) => {
+    try {
+        const authHeader = req.header("Authorization")
+        const tokenFromHeader = authHeader && authHeader.startsWith("Bearer ") 
+            ? authHeader.slice(7)
+            : null
+        
+        const token = req.cookies?.accessToken || tokenFromHeader
+    
+        if(token){
+            try {
+                const decodedToken = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
+                const user = await User.findById(decodedToken._id).select("-password -refreshToken")
+                if(user) req.user=user;
+            } catch (err) {
+                // ignore
+            }
+        }
+        next()
+    } catch (error) {
+        next()
+    }
+})

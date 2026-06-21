@@ -10,4 +10,15 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
+apiClient.interceptors.response.use((response) => {
+  if (response.data) {
+    let strData = JSON.stringify(response.data);
+    strData = strData.replace(/http:\/\/res\.cloudinary\.com/g, 'https://res.cloudinary.com');
+    response.data = JSON.parse(strData);
+  }
+  return response;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 export default apiClient;
