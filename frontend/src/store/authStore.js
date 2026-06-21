@@ -21,7 +21,11 @@ export const useAuthStore = create((set) => {
           localStorage.setItem('user', JSON.stringify(current));
         }
       } catch (e) {
-        // ignore — user not authenticated
+        set({ user: null });
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('user');
+            localStorage.removeItem('accessToken');
+        }
       }
     })();
   }
