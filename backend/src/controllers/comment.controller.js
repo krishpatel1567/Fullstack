@@ -43,10 +43,15 @@ const getVideoComments = asyncHandler(async (req, res) => {
             },
             {
                 $project: {
-                    _id: 0,
+                    _id: 1,
                     content: 1,
-                    ownerAvatar: "$commentOwnerDetails.avatar",
-                    commentedAt: { $toDate: "$_id" }
+                    owner: {
+                        _id: "$commentOwnerDetails._id",
+                        username: "$commentOwnerDetails.username",
+                        avatar: "$commentOwnerDetails.avatar",
+                        fullName: "$commentOwnerDetails.fullName"
+                    },
+                    createdAt: 1
                 }
             }
         ]),
@@ -64,6 +69,7 @@ const addComment = asyncHandler(async (req, res) => {
     // TODO: add a comment to a video
     const { videoId } = req.params
     const content = req.body.content
+    const owner = req.user?._id
     
     if (!isValidObjectId(videoId) || !isValidObjectId(owner)) throw new ApiError(400, `${!isValidObjectId(videoId) ? "Invalid video id" : "Invalid user id"}`)
 
@@ -76,9 +82,12 @@ const addComment = asyncHandler(async (req, res) => {
     })
 
     if (!comment) throw new ApiError(500, "Failed to save the comment")
+    
+    const populatedComment = await Comment.findById(comment._id).populate("owner", "username fullName avatar")
+
     return res
         .status(200)
-        .json(new ApiResponse(200, comment, "Comment added for the video"))
+        .json(new ApiResponse(200, populatedComment, "Comment added for the video"))
 })
 
 const updateComment = asyncHandler(async (req, res) => {

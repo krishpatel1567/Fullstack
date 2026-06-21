@@ -21,10 +21,6 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
         throw new ApiError(404, "video not found")
     }
 
-    if (likerId.toString() === video.owner.toString()) {
-        throw new ApiError(400, "Your cannot like your own video")
-    }
-
     const existingLike = await Like.findOne({
         video: videoId,
         likedBy: likerId
@@ -61,10 +57,6 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Comment not found")
     }
 
-    if (likerId.toString() === comment.owner.toString()) {
-        throw new ApiError(400, "Your cannot like your own comment")
-    }
-
     const existingLike = await Like.findOne({
         comment: commentId,
         likedBy: likerId
@@ -99,10 +91,6 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     const tweet = await Tweet.findById(tweetId)
     if (!tweet) {
         throw new ApiError(404, "Tweet not found")
-    }
-
-    if (likerId.toString() === tweet.owner.toString()) {
-        throw new ApiError(400, "Your cannot like your own tweet")
     }
 
     const existingLike = await Like.findOne({

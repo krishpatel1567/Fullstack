@@ -72,6 +72,31 @@ const getUserTweets = asyncHandler(async (req, res) => {
                 "owner.refreshToken": 0,
                 "owner.watchHistory": 0
             }
+        },
+        {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "tweet",
+                as: "likes"
+            }
+        },
+        {
+            $addFields: {
+                likeCount: { $size: "$likes" },
+                isLiked: {
+                    $cond: {
+                        if: { $in: [req.user?._id || null, "$likes.likedBy"] },
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                likes: 0
+            }
         }
     ];
 
@@ -122,6 +147,31 @@ const getAllTweets = asyncHandler(async (req,res) => {
                 "owner.password": 0,
                 "owner.refreshToken": 0,
                 "owner.watchHistory": 0
+            }
+        },
+        {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "tweet",
+                as: "likes"
+            }
+        },
+        {
+            $addFields: {
+                likeCount: { $size: "$likes" },
+                isLiked: {
+                    $cond: {
+                        if: { $in: [req.user?._id || null, "$likes.likedBy"] },
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                likes: 0
             }
         }
     ];

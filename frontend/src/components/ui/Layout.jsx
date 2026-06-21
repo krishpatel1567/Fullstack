@@ -8,9 +8,12 @@ export function Container({ children, className = '' }) {
   );
 }
 
+import { useLocation } from 'react-router-dom';
+
 export function PageLayout({ children, className = '' }) {
+  const location = useLocation();
   return (
-    <div className={`min-h-[calc(100vh-4rem)] bg-background text-foreground py-8 animate-fade-in ${className}`}>
+    <div key={location.pathname} className={`min-h-[calc(100vh-4rem)] bg-background text-foreground py-8 animate-fade-in ${className}`}>
       {children}
     </div>
   );

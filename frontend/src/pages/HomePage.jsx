@@ -113,7 +113,7 @@ export default function HomePage() {
 
             {/* Content Feed */}
             {activeTab === 'feed' && (
-              <div className="space-y-4">
+              <div className="space-y-4 animate-slide-up">
                 {tweetsLoading ? (
                   <LoadingSpinner />
                 ) : tweets.length === 0 ? (
@@ -132,7 +132,7 @@ export default function HomePage() {
             )}
 
             {activeTab === 'videos' && (
-              <div>
+              <div className="animate-slide-up">
                 {videosLoading ? (
                   <LoadingSpinner />
                 ) : videos.length === 0 ? (

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useTheme } from './ThemeProvider';
 import toast from 'react-hot-toast';
+import VidTubeIcon from '../components/VidTubeIcon';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -35,7 +36,15 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           
           <div className="flex items-center gap-8">
-            
+            <button
+              onClick={() => navigate('/')}
+              className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <div className="w-6 h-6 bg-primary text-primary-foreground rounded flex items-center justify-center text-xs bg-transparent">
+                <VidTubeIcon className="w-8 h-8 text-blue-600 hover:text-blue-700 bg-transparent" />
+              </div>
+              <span className="hidden sm:block">VidTube</span>
+            </button>
 
             <div className="hidden md:flex items-center space-x-1">
               {user && navLinks.map((link) => (
@@ -54,7 +63,18 @@ export default function Navbar() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <a
+              href="https://github.com/krishpatel1567/Fullstack"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-2 sm:px-3 py-1.5 text-foreground-muted hover:text-foreground hover:bg-surface-hover rounded-md transition-colors group"
+              title="View GitHub Repository"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.02c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A4.8 4.8 0 0 0 8 18v4"></path></svg>
+              <span className="text-sm font-medium hidden sm:block">krishpatel1567</span>
+            </a>
+            
             <button
               onClick={toggleTheme}
               className="p-2 text-foreground-muted hover:text-foreground hover:bg-surface-hover rounded-full transition-colors"
@@ -67,7 +87,7 @@ export default function Navbar() {
               )}
             </button>
             {user ? (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <button
                   onClick={() => navigate('/upload')}
                   className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-black rounded-md hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
@@ -88,11 +108,37 @@ export default function Navbar() {
                     )}
                   </button>
                   {menuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg shadow-xl py-1 z-50">
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg shadow-xl py-1 z-50 animate-slide-up origin-top-right">
                       <div className="px-4 py-2 border-b border-neutral-100 dark:border-neutral-800 mb-1">
                         <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100 truncate">{user.fullName || user.username}</p>
                         <p className="text-xs text-neutral-500 truncate">@{user.username}</p>
                       </div>
+                      
+                      <div className="md:hidden">
+                        {navLinks.map((link) => (
+                          <button
+                            key={link.path}
+                            onClick={() => {
+                              navigate(link.path);
+                              setMenuOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-1.5 text-sm transition-colors ${isActive(link.path) ? 'text-primary font-semibold' : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
+                          >
+                            {link.name}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => {
+                            navigate('/upload');
+                            setMenuOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                        >
+                          Upload Video
+                        </button>
+                        <div className="h-px bg-neutral-100 dark:bg-neutral-800 my-1" />
+                      </div>
+
                       <button
                         onClick={() => {
                           navigate(`/profile/${user._id}`);
@@ -126,16 +172,16 @@ export default function Navbar() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
                 <button
                   onClick={() => navigate('/login')}
-                  className="px-3 py-1.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+                  className="px-2 sm:px-3 py-1.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
                 >
                   Log in
                 </button>
                 <button
                   onClick={() => navigate('/register')}
-                  className="px-3 py-1.5 bg-neutral-900 dark:bg-white text-white dark:text-black text-sm font-medium rounded-md hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
+                  className="px-2 sm:px-3 py-1.5 bg-neutral-900 dark:bg-white text-white dark:text-black text-sm font-medium rounded-md hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
                 >
                   Sign up
                 </button>
