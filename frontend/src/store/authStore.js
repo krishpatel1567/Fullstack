@@ -37,7 +37,10 @@ export const useAuthStore = create((set) => {
         const data = await authService.login(email, password);
         const userObj = data.user || data;
         set({ user: userObj, isLoading: false });
-        if (typeof window !== 'undefined') localStorage.setItem('user', JSON.stringify(userObj));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user', JSON.stringify(userObj));
+          if (data.accessToken) localStorage.setItem('accessToken', data.accessToken);
+        }
         return userObj;
       } catch (err) {
         set({ error: err.response?.data?.message || 'Login failed', isLoading: false });
@@ -64,7 +67,10 @@ export const useAuthStore = create((set) => {
       try {
         await authService.logout();
         set({ user: null, isLoading: false });
-        if (typeof window !== 'undefined') localStorage.removeItem('user');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('user');
+          localStorage.removeItem('accessToken');
+        }
       } catch (err) {
         set({ error: err.response?.data?.message || 'Logout failed', isLoading: false });
       }
