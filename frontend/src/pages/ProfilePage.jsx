@@ -5,7 +5,7 @@ import { userService } from '../api/userService';
 import { subscriptionService } from '../api/subscriptionService';
 import { videoService } from '../api/videoService';
 import VideoCard from '../components/VideoCard';
-import LoadingSpinner from '../components/LoadingSpinner';
+import {LoadingSpinner} from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
@@ -32,6 +32,7 @@ export default function ProfilePage() {
       setProfile(data);
       setFullName(data.fullName);
       setEmail(data.email);
+      setIsSubscribed(data.isSubscribed || false);
       loadUserVideos();
       loadSubscribers();
     } catch (err) {
@@ -43,9 +44,8 @@ export default function ProfilePage() {
 
   const loadUserVideos = async () => {
     try {
-      const videos = await videoService.getAllVideos();
-      const filtered = videos.filter(v => v.owner?._id === userId);
-      setUserVideos(filtered);
+      const videos = await videoService.getAllVideos(1, 100, userId);
+      setUserVideos(videos);
     } catch (err) {
       console.error('Failed to load videos');
     }
@@ -65,7 +65,7 @@ export default function ProfilePage() {
       await subscriptionService.toggleSubscription(userId);
       setIsSubscribed(!isSubscribed);
       setSubscribers(isSubscribed ? subscribers - 1 : subscribers + 1);
-      toast.success(isSubscribed ? 'Unsubscribed' : 'Subscribed!');
+      toast.success(isSubscribed ? 'Unsubscribed' : 'Subscribed');
     } catch (err) {
       toast.error('Failed to toggle subscription');
     }
@@ -80,116 +80,134 @@ export default function ProfilePage() {
       await userService.updateAccountDetails(fullName, email);
       setProfile({ ...profile, fullName, email });
       setIsEditing(false);
-      toast.success('Profile updated!');
+      toast.success('Profile updated');
     } catch (err) {
       toast.error('Failed to update profile');
     }
   };
 
-  if (isLoading) return <LoadingSpinner />;
-  if (!profile) return <div className="text-center py-12">Profile not found</div>;
+  if (isLoading) return <div className="flex justify-center items-center h-screen"><LoadingSpinner /></div>;
+  if (!profile) return <div className="text-neutral-500 text-center py-20 font-medium">Profile not found</div>;
 
   const isOwnProfile = currentUser?._id === userId;
+  const avatarUrl = profile.avatar || currentUser?.avatar; // fallback for "My Profile" if not populated
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-48"></div>
+    <div className="min-h-screen bg-white dark:bg-black font-sans text-neutral-900 dark:text-neutral-100 selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-black pb-20">
+      {/* Cover Banner */}
+      <div className="h-40 sm:h-56 bg-neutral-100 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 overflow-hidden relative">
+        {profile.coverImage ? (
+          <img src={profile.coverImage} alt="Cover" className="w-full h-full object-cover opacity-90" />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-900 dark:to-neutral-800"></div>
+        )}
+      </div>
 
-      <div className="max-w-6xl mx-auto px-4 pb-12">
-        <div className="bg-white rounded-lg shadow-md p-6 -mt-24 mb-8">
-          <div className="flex flex-col md:flex-row items-start md:items-end space-y-4 md:space-y-0 md:space-x-6">
-            <div className="w-32 h-32 rounded-full bg-blue-500 text-white flex items-center justify-center text-5xl border-4 border-white shadow-lg flex-shrink-0 overflow-hidden">
-              {profile.avatar ? (
-                <img src={profile.avatar} alt={profile.username} className="w-full h-full object-cover" />
-              ) : (
-                <span>{profile.username?.[0]?.toUpperCase()}</span>
-              )}
-            </div>
-
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-800">{profile.username}</h1>
-              <p className="text-gray-600">{profile.fullName}</p>
-              <div className="flex items-center space-x-6 mt-2 text-sm text-gray-600">
-                <span>📺 {userVideos.length} videos</span>
-                <span>👥 {subscribers} subscribers</span>
+      <div className="max-w-[1000px] mx-auto px-6">
+        {/* Profile Header Area */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between -mt-12 sm:-mt-16 mb-12 gap-6 relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-6">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white dark:bg-black p-1 flex-shrink-0">
+              <div className="w-full h-full rounded-full bg-neutral-100 dark:bg-neutral-900 text-neutral-500 flex items-center justify-center text-3xl font-light border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={profile.username} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="font-medium">{profile.username?.[0]?.toUpperCase()}</span>
+                )}
               </div>
             </div>
 
+            <div className="pb-2">
+              <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{profile.fullName || profile.username}</h1>
+              <p className="text-neutral-500 dark:text-neutral-400 font-medium">@{profile.username}</p>
+              <div className="flex items-center space-x-4 mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+                <span className="font-medium">{subscribers} <span className="font-normal opacity-80">subscribers</span></span>
+                <span className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700"></span>
+                <span className="font-medium">{userVideos.length} <span className="font-normal opacity-80">videos</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 pb-2">
             {!isOwnProfile && currentUser && (
               <button
                 onClick={handleSubscribe}
-                className={`px-6 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap ${
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
                   isSubscribed
-                    ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                    : 'bg-red-600 text-white hover:bg-red-700'
+                    ? 'bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-200 dark:hover:bg-neutral-800'
+                    : 'bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200'
                 }`}
               >
-                {isSubscribed ? '✓ Subscribed' : '+ Subscribe'}
+                {isSubscribed ? 'Subscribed' : 'Subscribe'}
               </button>
             )}
 
             {isOwnProfile && !isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold whitespace-nowrap"
+                className="px-6 py-2 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 bg-white dark:bg-black rounded-full text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-all"
               >
-                ✏️ Edit Profile
+                Edit Profile
               </button>
             )}
           </div>
-
-          {isEditing && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="flex space-x-2 justify-end">
-                  <button
-                    onClick={() => {
-                      setIsEditing(false);
-                      setFullName(profile.fullName);
-                      setEmail(profile.email);
-                    }}
-                    className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveProfile}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">🎬 Videos</h2>
+        {isEditing && (
+          <div className="bg-neutral-50 dark:bg-neutral-900/50 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 mb-12 max-w-xl">
+            <h3 className="font-semibold text-neutral-900 dark:text-neutral-100 mb-6">Profile Settings</h3>
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Full Name</label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full px-4 py-2 bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-shadow"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-2 bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-shadow"
+                />
+              </div>
+              <div className="flex space-x-3 justify-end pt-4">
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setFullName(profile.fullName);
+                    setEmail(profile.email);
+                  }}
+                  className="px-4 py-2 text-neutral-700 dark:text-neutral-300 bg-transparent rounded-lg text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveProfile}
+                  className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black rounded-lg text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-8 border-t border-neutral-100 dark:border-neutral-900 pt-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Videos</h2>
+          </div>
+          
           {userVideos.length === 0 ? (
-            <div className="bg-white rounded-lg p-12 text-center">
-              <p className="text-gray-500 text-lg">{profile.username} has no videos yet</p>
+            <div className="border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl p-16 text-center">
+              <p className="text-neutral-500 font-medium">No videos uploaded yet</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
               {userVideos.map((video) => (
                 <VideoCard key={video._id} video={video} />
               ))}

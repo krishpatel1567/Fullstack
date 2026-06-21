@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { userService } from '../api/userService';
 import VideoCard from '../components/VideoCard';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { PageLayout, Container, SectionHeader } from '../components/ui/Layout';
+import { EmptyState } from '../components/ui/EmptyState';
 import toast from 'react-hot-toast';
 
 export default function WatchHistoryPage() {
@@ -28,29 +30,38 @@ export default function WatchHistoryPage() {
     }
   };
 
-  if (!user) return <div>Please login to view history</div>;
+  if (!user) return (
+    <PageLayout>
+      <Container>
+        <EmptyState title="Not Authenticated" description="Please login to view your watch history." />
+      </Container>
+    </PageLayout>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">⏱️ Watch History</h1>
-        </div>
+    <PageLayout>
+      <Container>
+        <SectionHeader 
+          title="Watch History" 
+          description="Keep track of all the videos you've watched."
+        />
 
         {isLoading ? (
-          <LoadingSpinner message="Loading history..." />
+          <LoadingSpinner />
         ) : history.length === 0 ? (
-          <div className="bg-white rounded-lg p-12 text-center">
-            <p className="text-gray-500 text-lg">You haven't watched any videos yet</p>
-          </div>
+          <EmptyState 
+            icon="⏱️"
+            title="No history yet"
+            description="You haven't watched any videos yet. Start exploring!"
+          />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {history.map((video) => (
               <VideoCard key={video._id} video={video} />
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </Container>
+    </PageLayout>
   );
 }

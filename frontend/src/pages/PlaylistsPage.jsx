@@ -2,7 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { playlistService } from '../api/playlistService';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { Button } from '../components/ui/Button';
+import { Input, Textarea } from '../components/ui/Input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
+import { PageLayout, Container, SectionHeader } from '../components/ui/Layout';
+import { EmptyState } from '../components/ui/EmptyState';
 import toast from 'react-hot-toast';
 
 export default function PlaylistsPage() {
@@ -53,7 +58,8 @@ export default function PlaylistsPage() {
     }
   };
 
-  const handleDeletePlaylist = async (playlistId) => {
+  const handleDeletePlaylist = async (playlistId, e) => {
+    e.stopPropagation();
     if (confirm('Are you sure you want to delete this playlist?')) {
       try {
         await playlistService.deletePlaylist(playlistId);
@@ -65,106 +71,112 @@ export default function PlaylistsPage() {
     }
   };
 
-  if (!user) return <div>Please login to view playlists</div>;
+  if (!user) return (
+    <PageLayout>
+      <Container>
+        <EmptyState title="Not Authenticated" description="Please login to view your playlists." />
+      </Container>
+    </PageLayout>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">📚 My Playlists</h1>
-          <button
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-          >
-            {showCreateForm ? '✕ Cancel' : '+ Create Playlist'}
-          </button>
-        </div>
+    <PageLayout>
+      <Container>
+        <SectionHeader 
+          title="My Playlists" 
+          description="Organize your favorite videos into custom playlists."
+          actions={
+            <Button onClick={() => setShowCreateForm(!showCreateForm)}>
+              {showCreateForm ? 'Cancel' : 'Create Playlist'}
+            </Button>
+          }
+        />
 
         {showCreateForm && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-l-4 border-blue-600">
-            <input
-              type="text"
-              placeholder="Playlist name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <textarea
-              placeholder="Description (optional)"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-              rows="3"
-            />
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => setShowCreateForm(false)}
-                className="px-4 py-2 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreatePlaylist}
-                disabled={isCreating}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-              >
-                {isCreating ? 'Creating...' : 'Create'}
-              </button>
+          <Card className="mb-8 p-6 max-w-xl">
+            <h3 className="text-lg font-semibold mb-4">Create New Playlist</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Name</label>
+                <Input
+                  placeholder="e.g. My Favorites"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Description (optional)</label>
+                <Textarea
+                  placeholder="What's this playlist about?"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="ghost" onClick={() => setShowCreateForm(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreatePlaylist} disabled={isCreating}>
+                  {isCreating ? 'Creating...' : 'Create'}
+                </Button>
+              </div>
             </div>
-          </div>
+          </Card>
         )}
 
         {isLoading ? (
-          <LoadingSpinner message="Loading playlists..." />
+          <LoadingSpinner />
         ) : playlists.length === 0 ? (
-          <div className="bg-white rounded-lg p-12 text-center">
-            <p className="text-gray-500 text-lg mb-4">No playlists yet</p>
-            <button
-              onClick={() => setShowCreateForm(true)}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-            >
-              Create your first playlist
-            </button>
-          </div>
+          <EmptyState 
+            icon="📚"
+            title="No playlists yet"
+            description="You haven't created any playlists. Create one to organize your videos!"
+            action={
+              <Button onClick={() => setShowCreateForm(true)}>
+                Create your first playlist
+              </Button>
+            }
+          />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {playlists.map((playlist) => (
               <div
                 key={playlist._id}
-                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer group overflow-hidden"
+                onClick={() => navigate(`/playlist/${playlist._id}`)}
+                className="group cursor-pointer flex flex-col gap-3"
               >
-                <div className="h-32 bg-gradient-to-br from-blue-500 to-blue-600 group-hover:from-blue-600 group-hover:to-blue-700 flex items-center justify-center relative">
-                  <span className="text-5xl">📚</span>
-                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity flex items-center justify-center">
-                    <span className="text-white text-3xl">▶️</span>
-                  </div>
+                <div className="relative aspect-video bg-neutral-100 dark:bg-neutral-900 rounded-xl overflow-hidden border border-border flex items-center justify-center">
+                  <span className="text-4xl">📚</span>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                 </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">{playlist.name}</h3>
-                  {playlist.description && (
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{playlist.description}</p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-2">{playlist.videos?.length || 0} videos</p>
-                  <div className="flex space-x-2 mt-4">
+                
+                <div className="flex flex-col min-w-0 px-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-medium text-sm text-foreground line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                      {playlist.name}
+                    </h3>
                     <button
-                      onClick={() => navigate(`/playlist/${playlist._id}`)}
-                      className="flex-1 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm font-semibold"
+                      onClick={(e) => handleDeletePlaylist(playlist._id, e)}
+                      className="text-foreground-muted hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                      title="Delete playlist"
                     >
-                      View
-                    </button>
-                    <button
-                      onClick={() => handleDeletePlaylist(playlist._id)}
-                      className="flex-1 px-3 py-2 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors text-sm font-semibold"
-                    >
-                      Delete
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                   </div>
+                  {playlist.description && (
+                    <p className="text-[13px] text-foreground-muted mt-1 line-clamp-1">
+                      {playlist.description}
+                    </p>
+                  )}
+                  <p className="text-[12px] text-foreground-muted mt-1">
+                    {playlist.videos?.length || 0} videos
+                  </p>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </Container>
+    </PageLayout>
   );
 }

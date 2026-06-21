@@ -13,9 +13,13 @@ export const videoService = {
     return response.data.data;
   },
 
-  getAllVideos: async (page = 1, limit = 10) => {
+  getAllVideos: async (page = 1, limit = 10, userId) => {
+    const params = { page, limit };
+    if (userId) {
+      params.userId = userId;
+    }
     const response = await apiClient.get('/videos', {
-      params: { page, limit },
+      params,
     });
     return response.data.data.videos || [];
   },

@@ -381,7 +381,75 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     }
     return res
         .status(200)
-        .json(new ApiResponse(200,{}, "user channel fetched successfully"))
+        .json(new ApiResponse(200, channel[0], "user channel fetched successfully"))
+
+})
+
+const getUserChannelProfileById = asyncHandler(async(req,res)=>{
+    const { userId } = req.params
+
+    if (!userId) {
+        throw new ApiError(400, "User ID is missing")
+    }
+
+    const channel = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(userId)
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {
+                subscribersCount: {
+                    $size: "$subscribers"
+                },
+                channelSubscribedToCount: {
+                    $size: "$subscribedTo"
+                },
+                isSubscribed: {
+                    $cond: {
+                        if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                fullName: 1,
+                username: 1,
+                subscribersCount: 1,
+                channelSubscribedToCount: 1,
+                isSubscribed: 1,
+                avatar: 1,
+                coverImage: 1,
+                email: 1
+            }
+        }
+    ])
+    if (!channel?.length) {
+        throw new ApiError(400, "channel doesnot exists")
+    }
+    return res
+        .status(200)
+        .json(new ApiResponse(200, channel[0], "user channel fetched successfully"))
 
 })
 
@@ -444,5 +512,6 @@ export {
     updateAvatar,
     updateUserCoverImage,
     getUserChannelProfile,
-    getWatcherHistory
+    getWatcherHistory,
+    getUserChannelProfileById
 }

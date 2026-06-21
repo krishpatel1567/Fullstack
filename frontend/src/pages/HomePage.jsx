@@ -5,7 +5,11 @@ import { useTweetStore } from '../store/tweetStore';
 import { useVideoStore } from '../store/videoStore';
 import TweetCard from '../components/TweetCard';
 import VideoCard from '../components/VideoCard';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { PageLayout, Container, SectionHeader } from '../components/ui/Layout';
+import { Button } from '../components/ui/Button';
+import { Avatar } from '../components/ui/Avatar';
+import { EmptyState } from '../components/ui/EmptyState';
 import toast from 'react-hot-toast';
 
 export default function HomePage() {
@@ -35,7 +39,7 @@ export default function HomePage() {
     try {
       await useTweetStore.getState().createTweet(newTweetContent);
       setNewTweetContent('');
-      toast.success('Tweet posted!');
+      toast.success('Tweet posted');
     } catch (err) {
       toast.error('Failed to create tweet');
     } finally {
@@ -46,81 +50,74 @@ export default function HomePage() {
   if (!user) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            {user && (
-              <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-l-4 border-blue-600">
+    <PageLayout>
+      <Container>
+        
+        {/* Header Section */}
+        <div className="mb-10 flex items-center justify-between">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Home</h1>
+          <div className="flex items-center space-x-2 bg-surface-hover rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab('feed')}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                activeTab === 'feed'
+                  ? 'bg-background shadow-sm text-foreground'
+                  : 'text-foreground-muted hover:text-foreground'
+              }`}
+            >
+              Feed
+            </button>
+            <button
+              onClick={() => setActiveTab('videos')}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                activeTab === 'videos'
+                  ? 'bg-background shadow-sm text-foreground'
+                  : 'text-foreground-muted hover:text-foreground'
+              }`}
+            >
+              Videos
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 xl:gap-12">
+          {/* Main Content Area */}
+          <div className="lg:col-span-3">
+            
+            {/* Create Tweet Form */}
+            {activeTab === 'feed' && user && (
+              <div className="mb-8 border-b-2 pb-3">
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center flex-shrink-0">
-                    {user.avatar ? (
-                      <img src={user.avatar} alt={user.username} className="w-full h-full rounded-full object-cover" />
-                    ) : (
-                      <span>{user.username?.[0]?.toUpperCase()}</span>
-                    )}
-                  </div>
+                  <Avatar src={user.avatar} alt={user.username} />
                   <div className="flex-1">
                     <textarea
                       value={newTweetContent}
                       onChange={(e) => setNewTweetContent(e.target.value)}
                       placeholder="What's on your mind?"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                      rows="3"
+                      className="w-full p-2 bg-transparent border-none focus:ring-0 resize-none text-base outline-none placeholder:text-foreground-muted text-foreground"
+                      rows="2"
                     />
-                    <div className="flex justify-between items-center mt-4">
-                      <div className="flex space-x-2">
-                        <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                          📸
-                        </button>
-                        <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                          😊
-                        </button>
-                      </div>
-                      <button
+                    <div className="flex justify-end items-center mt-2 pt-2 border-t border-border">
+                      <Button
                         onClick={handleCreateTweet}
                         disabled={tweetLoading || !newTweetContent.trim()}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                        className="rounded-full px-5"
                       >
-                        {tweetLoading ? '📤 Posting...' : 'Post Tweet'}
-                      </button>
+                        {tweetLoading ? 'Posting...' : 'Post'}
+                      </Button>
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="flex space-x-2 mb-6 border-b border-gray-200">
-              <button
-                onClick={() => setActiveTab('feed')}
-                className={`px-6 py-3 font-semibold transition-all border-b-2 ${
-                  activeTab === 'feed'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-800'
-                }`}
-              >
-                📝 Feed
-              </button>
-              <button
-                onClick={() => setActiveTab('videos')}
-                className={`px-6 py-3 font-semibold transition-all border-b-2 ${
-                  activeTab === 'videos'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-800'
-                }`}
-              >
-                🎥 Videos
-              </button>
-            </div>
-
+            {/* Content Feed */}
             {activeTab === 'feed' && (
               <div className="space-y-4">
                 {tweetsLoading ? (
-                  <LoadingSpinner message="Loading tweets..." />
+                  <LoadingSpinner />
                 ) : tweets.length === 0 ? (
-                  <div className="bg-white rounded-lg p-8 text-center">
-                    <p className="text-gray-500 text-lg">No tweets yet. Be the first!</p>
-                  </div>
+                  <EmptyState title="No updates yet" />
                 ) : (
                   tweets.map((tweet) => (
                     <TweetCard
@@ -137,19 +134,14 @@ export default function HomePage() {
             {activeTab === 'videos' && (
               <div>
                 {videosLoading ? (
-                  <LoadingSpinner message="Loading videos..." />
+                  <LoadingSpinner />
                 ) : videos.length === 0 ? (
-                  <div className="bg-white rounded-lg p-8 text-center">
-                    <p className="text-gray-500 text-lg">No videos yet. Upload one!</p>
-                    <button
-                      onClick={() => navigate('/upload')}
-                      className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Upload Video
-                    </button>
-                  </div>
+                  <EmptyState 
+                    title="No videos found" 
+                    action={<Button onClick={() => navigate('/upload')}>Upload Video</Button>}
+                  />
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {videos.map((video) => (
                       <VideoCard key={video._id} video={video} />
                     ))}
@@ -159,46 +151,53 @@ export default function HomePage() {
             )}
           </div>
 
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-20">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">⚡ Quick Actions</h2>
-              <div className="space-y-3">
+          {/* Sidebar Area */}
+          <div className="hidden lg:block lg:col-span-1 border-l border-border pl-8">
+            <div className="sticky top-24">
+              <div className="flex items-center space-x-3 mb-6">
+                <Avatar src={user.avatar} alt={user.username} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{user.fullName || user.username}</p>
+                  <p className="text-xs text-foreground-muted truncate">@{user.username}</p>
+                </div>
+              </div>
+
+              <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wider mb-3">Quick Links</h3>
+              <nav className="space-y-1">
                 <button
                   onClick={() => navigate('/upload')}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all hover:scale-105 font-semibold"
+                  className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-foreground-muted rounded-lg hover:bg-surface-hover hover:text-foreground transition-colors"
                 >
-                  📤 Upload Video
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  <span>Upload Video</span>
                 </button>
                 <button
                   onClick={() => navigate(`/profile/${user._id}`)}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all hover:scale-105 font-semibold"
+                  className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-foreground-muted rounded-lg hover:bg-surface-hover hover:text-foreground transition-colors"
                 >
-                  👤 My Profile
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  <span>My Profile</span>
                 </button>
                 <button
                   onClick={() => navigate('/playlists')}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition-all hover:scale-105 font-semibold"
+                  className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-foreground-muted rounded-lg hover:bg-surface-hover hover:text-foreground transition-colors"
                 >
-                  📚 My Playlists
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                  <span>Playlists</span>
                 </button>
                 <button
                   onClick={() => navigate('/watch-history')}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition-all hover:scale-105 font-semibold"
+                  className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-foreground-muted rounded-lg hover:bg-surface-hover hover:text-foreground transition-colors"
                 >
-                  ⏱️ Watch History
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  <span>History</span>
                 </button>
-              </div>
-
-              <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-sm text-gray-700">
-                  👋 Welcome back, <strong>{user.username}</strong>!
-                </p>
-                <p className="text-xs text-gray-600 mt-2">Keep sharing amazing content</p>
-              </div>
+              </nav>
             </div>
           </div>
+          
         </div>
-      </div>
-    </div>
+      </Container>
+    </PageLayout>
   );
 }

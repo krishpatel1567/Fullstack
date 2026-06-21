@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import './index.css'
 import AppRoutes from "./routes/AppRoutes"
-
+import { ThemeProvider } from './components/ThemeProvider'
 
 function App() {
-
   return (
-    <AppRoutes />
+    <ThemeProvider>
+      <AppRoutes />
+    </ThemeProvider>
   )
 }
 

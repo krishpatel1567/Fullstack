@@ -1,8 +1,13 @@
 import apiClient from "../utils/apiClient.js";
 
 export const userService = {
-  getUserProfile: async (username) => {
-    const response = await apiClient.post('/users/username', { username });
+  getUserProfile: async (userId) => {
+    const response = await apiClient.get(`/users/channel/${userId}`);
+    return response.data.data;
+  },
+
+  getUserChannelProfileById: async (userId) => {
+    const response = await apiClient.get(`/users/channel/${userId}`);
     return response.data.data;
   },
 

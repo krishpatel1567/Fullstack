@@ -4,6 +4,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from '../store/authStore';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
 import toast from 'react-hot-toast';
 
 const loginSchema = z.object({
@@ -29,55 +32,60 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8 animate-fade-in">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-600 mb-2">📺 MediaHub</h1>
-          <p className="text-gray-600">Welcome back! Sign in to continue</p>
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <input
-              type="email"
-              {...register('email')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="you@example.com"
-            />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-background p-4 animate-fade-in">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center pb-8">
+          <div className="mx-auto w-10 h-10 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mb-4">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           </div>
+          <CardTitle className="text-2xl">Welcome back</CardTitle>
+          <CardDescription>Sign in to your account to continue</CardDescription>
+        </CardHeader>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-            <input
-              type="password"
-              {...register('password')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="••••••••"
-            />
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
-          </div>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Email</label>
+              <Input
+                type="email"
+                {...register('email')}
+                placeholder="you@example.com"
+              />
+              {errors.email && <p className="text-destructive text-xs mt-1.5">{errors.email.message}</p>}
+            </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-transform"
-          >
-            {isLoading ? '🔄 Logging in...' : 'Login'}
-          </button>
-        </form>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Password</label>
+              <Input
+                type="password"
+                {...register('password')}
+                placeholder="••••••••"
+              />
+              {errors.password && <p className="text-destructive text-xs mt-1.5">{errors.password.message}</p>}
+            </div>
 
-        <p className="text-center mt-6 text-gray-600">
-          Don't have an account?{' '}
-          <button
-            onClick={() => navigate('/register')}
-            className="text-blue-600 font-semibold hover:text-blue-700 transition-colors"
-          >
-            Sign up
-          </button>
-        </p>
-      </div>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full mt-6"
+            >
+              {isLoading ? 'Signing in...' : 'Sign In'}
+            </Button>
+          </form>
+        </CardContent>
+
+        <CardFooter className="justify-center border-t border-border pt-6">
+          <p className="text-sm text-foreground-muted">
+            Don't have an account?{' '}
+            <button
+              onClick={() => navigate('/register')}
+              className="text-primary font-medium hover:underline transition-colors"
+            >
+              Sign up
+            </button>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

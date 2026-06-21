@@ -1,20 +1,82 @@
 @import "tailwindcss";
 
-@layer components {
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-in-out forwards;
+@theme {
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-border-muted: var(--border-muted);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-full: 9999px;
+
+  --animate-fade-in: fadeIn 0.25s ease-out forwards;
+  --animate-slide-up: slideUp 0.2s ease-out forwards;
+}
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --background-secondary: #f9fafb;
+    --surface: #ffffff;
+    --surface-hover: #f3f4f6;
+    --border: #e5e7eb;
+    --border-muted: #f3f4f6;
+    --foreground: #09090b;
+    --foreground-muted: #6b7280;
+    --primary: #09090b;
+    --primary-foreground: #fafafa;
+    --destructive: #ef4444;
+    --destructive-foreground: #fafafa;
+
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+  }
+
+  .dark {
+    --background: #09090b;
+    --background-secondary: #121214;
+    --surface: #18181b;
+    --surface-hover: #27272a;
+    --border: #27272a;
+    --border-muted: #18181b;
+    --foreground: #fafafa;
+    --foreground-muted: #a1a1aa;
+    --primary: #fafafa;
+    --primary-foreground: #09090b;
+    --destructive: #7f1d1d;
+    --destructive-foreground: #fef2f2;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 ::-webkit-scrollbar {
@@ -23,18 +85,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--border);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-body {
-  scroll-behavior: smooth;
+  background: var(--foreground-muted);
 }

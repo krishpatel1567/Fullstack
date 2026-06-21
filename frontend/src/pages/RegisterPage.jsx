@@ -4,6 +4,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from '../store/authStore';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
 import toast from 'react-hot-toast';
 
 const registerSchema = z.object({
@@ -43,98 +46,97 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8 animate-fade-in">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-600 mb-2">📺 MediaHub</h1>
-          <p className="text-gray-600">Create your account and start sharing</p>
-        </div>
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-background p-4 animate-fade-in py-12">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center pb-6">
+          <div className="mx-auto w-10 h-10 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mb-4">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <CardTitle className="text-2xl">Create an account</CardTitle>
+          <CardDescription>Join MediaHub and start sharing</CardDescription>
+        </CardHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <div className="text-center mb-6">
-            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden border-2 border-blue-300">
-              {previewUrl ? (
-                <img src={previewUrl} alt="Avatar preview" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-4xl">👤</span>
-              )}
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="flex flex-col items-center mb-6">
+              <label className="cursor-pointer group relative">
+                <div className="w-20 h-20 rounded-full bg-surface-hover flex items-center justify-center overflow-hidden border border-border group-hover:border-primary transition-colors">
+                  {previewUrl ? (
+                    <img src={previewUrl} alt="Avatar preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-foreground-muted group-hover:text-foreground transition-colors"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  className="hidden"
+                />
+              </label>
+              <span className="text-xs text-foreground-muted mt-2">Upload avatar (optional)</span>
             </div>
-            <label className="cursor-pointer">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                className="hidden"
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Full Name</label>
+              <Input
+                {...register('fullName')}
+                placeholder="John Doe"
               />
-              <span className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
-                Choose avatar
-              </span>
-            </label>
-          </div>
+              {errors.fullName && <p className="text-destructive text-xs mt-1.5">{errors.fullName.message}</p>}
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-            <input
-              type="text"
-              {...register('fullName')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="John Doe"
-            />
-            {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>}
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Email</label>
+              <Input
+                type="email"
+                {...register('email')}
+                placeholder="you@example.com"
+              />
+              {errors.email && <p className="text-destructive text-xs mt-1.5">{errors.email.message}</p>}
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <input
-              type="email"
-              {...register('email')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="you@example.com"
-            />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Username</label>
+              <Input
+                {...register('username')}
+                placeholder="johndoe"
+              />
+              {errors.username && <p className="text-destructive text-xs mt-1.5">{errors.username.message}</p>}
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
-            <input
-              type="text"
-              {...register('username')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="johndoe"
-            />
-            {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>}
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Password</label>
+              <Input
+                type="password"
+                {...register('password')}
+                placeholder="••••••••"
+              />
+              {errors.password && <p className="text-destructive text-xs mt-1.5">{errors.password.message}</p>}
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-            <input
-              type="password"
-              {...register('password')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="••••••••"
-            />
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
-          </div>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full mt-6"
+            >
+              {isLoading ? 'Creating account...' : 'Sign Up'}
+            </Button>
+          </form>
+        </CardContent>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-transform"
-          >
-            {isLoading ? '🔄 Creating account...' : 'Sign Up'}
-          </button>
-        </form>
-
-        <p className="text-center mt-6 text-gray-600">
-          Already have an account?{' '}
-          <button
-            onClick={() => navigate('/login')}
-            className="text-blue-600 font-semibold hover:text-blue-700 transition-colors"
-          >
-            Login
-          </button>
-        </p>
-      </div>
+        <CardFooter className="justify-center border-t border-border pt-6">
+          <p className="text-sm text-foreground-muted">
+            Already have an account?{' '}
+            <button
+              onClick={() => navigate('/login')}
+              className="text-primary font-medium hover:underline transition-colors"
+            >
+              Log in
+            </button>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

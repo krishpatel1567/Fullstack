@@ -10,44 +10,65 @@ import { deleteCloudinaryFile, uploadOnCloudinary } from "../utils/cloudinary.js
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
 
-    // Step 1: Build the match stage (filter conditions)
+    // Step 1: Build the match stage
     const matchStage = {
         $match: {
-            isPublished: true  // Only get published videos
+            isPublished: true
         }
     };
 
-    // Add userId filter if provided
     if (userId && isValidObjectId(userId)) {
         matchStage.$match.owner = new mongoose.Types.ObjectId(userId);
     }
 
-    // Add search query filter if provided
     if (query) {
         matchStage.$match.$or = [
-            { title: { $regex: query, $options: "i" } },  // Case-insensitive search in title(through $option:"i")
-            { description: { $regex: query, $options: "i" } }  // Case-insensitive search in description
+            { title: { $regex: query, $options: "i" } },
+            { description: { $regex: query, $options: "i" } }
         ];
     }
 
-    // Step 2: Build the sort stage
-    const sortStage = {};
+    // Step 2: Build the pipeline for aggregatePaginate
+    const pipeline = [
+        matchStage,
+        // New: Populate owner details
+        {
+            $lookup: {
+                from: "users", // The name of the users collection in MongoDB
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner"
+            }
+        },
+        {
+            $unwind: "$owner" // Converts the owner array into an object
+        },
+        {
+            $project: {
+                "owner.password": 0, // Exclude sensitive fields
+                "owner.refreshToken": 0,
+                "owner.watchHistory": 0
+            }
+        }
+    ];
 
+    // Step 3: Build the sort stage
+    const sortStage = {};
     if (sortBy) {
-        // Allow sorting by: views, createdAt, duration, etc.
         const allowedSortFields = ["views", "createdAt", "duration", "title"];
         const finalSortBy = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
-        sortStage[finalSortBy] = sortType === "asc" ? 1 : -1;  // 1 for ascending, -1 for descending
+        sortStage[finalSortBy] = sortType === "asc" ? 1 : -1;
     } else {
-        // Default: sort by newest first
         sortStage.createdAt = -1;
     }
+    
+    // Add sort to pipeline
+    pipeline.push({ $sort: sortStage });
 
-    // Step 3: Use aggregatePaginate for pagination
+    // Step 4: Use aggregatePaginate
     const options = {
         page: parseInt(page, 10),
         limit: parseInt(limit, 10),
-        sort: sortStage,
         customLabels: {
             totalDocs: "totalVideos",
             docs: "videos"
@@ -55,11 +76,10 @@ const getAllVideos = asyncHandler(async (req, res) => {
     };
 
     const result = await Video.aggregatePaginate(
-        Video.aggregate([matchStage]),
+        Video.aggregate(pipeline),
         options
     );
 
-    // Step 4: Return the result
     return res
         .status(200)
         .json(new ApiResponse(200, result, "Videos fetched successfully"));

@@ -4,6 +4,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useVideoStore } from '../store/videoStore';
+import { PageLayout, Container, SectionHeader } from '../components/ui/Layout';
+import { Card, CardContent } from '../components/ui/Card';
+import { Input, Textarea } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
 import toast from 'react-hot-toast';
 
 const uploadSchema = z.object({
@@ -59,93 +63,94 @@ export default function VideoUploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">📤 Upload Video</h1>
-          <p className="text-gray-600 mb-8">Share your amazing video with the world</p>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="border-2 border-dashed border-blue-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer group">
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={handleVideoChange}
-                  className="hidden"
-                />
-                <div className="group-hover:scale-110 transition-transform">
-                  <div className="text-4xl mb-2">🎥</div>
-                  <p className="text-gray-700 font-semibold">Choose video file</p>
-                  <p className="text-sm text-gray-500 mt-1">or drag and drop</p>
-                </div>
-              </label>
-              {videoFile && (
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm text-gray-700">✅ {videoFile.name}</p>
-                  <p className="text-xs text-gray-600">{(videoFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                </div>
-              )}
-            </div>
-
-            <div className="border-2 border-dashed border-green-300 rounded-lg p-6 text-center hover:border-green-500 transition-colors cursor-pointer group">
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleThumbnailChange}
-                  className="hidden"
-                />
-                <div className="group-hover:scale-110 transition-transform">
-                  <div className="text-3xl mb-2">🖼️</div>
-                  <p className="text-gray-700 font-semibold">Choose thumbnail</p>
-                </div>
-              </label>
-              {thumbnailPreview && (
-                <img src={thumbnailPreview} alt="Thumbnail" className="mt-4 h-24 mx-auto rounded-lg" />
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
-              <input
-                type="text"
-                {...register('title')}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                placeholder="My Awesome Video"
-              />
-              {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-              <textarea
-                {...register('description')}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
-                placeholder="Tell us about your video..."
-                rows="4"
-              />
-            </div>
-
-            {videoProgress > 0 && (
-              <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-full transition-all duration-300"
-                  style={{ width: `${videoProgress}%` }}
-                ></div>
+    <PageLayout>
+      <Container className="max-w-2xl">
+        <SectionHeader 
+          title="Upload Video" 
+          description="Share your amazing video with the world" 
+        />
+        
+        <Card>
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              
+              <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary hover:bg-surface-hover transition-colors cursor-pointer group">
+                <label className="cursor-pointer block">
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoChange}
+                    className="hidden"
+                  />
+                  <div className="text-4xl mb-2 text-foreground-muted group-hover:text-foreground transition-colors">🎥</div>
+                  <p className="text-foreground font-medium">Choose video file</p>
+                  <p className="text-sm text-foreground-muted mt-1">or drag and drop</p>
+                </label>
+                {videoFile && (
+                  <div className="mt-4 p-3 bg-background rounded-lg border border-border">
+                    <p className="text-sm text-foreground font-medium truncate">✅ {videoFile.name}</p>
+                    <p className="text-xs text-foreground-muted">{(videoFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                  </div>
+                )}
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={isLoading || !videoFile}
-              className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-transform"
-            >
-              {isLoading ? '⏳ Uploading...' : '🚀 Upload Video'}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+              <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary hover:bg-surface-hover transition-colors cursor-pointer group">
+                <label className="cursor-pointer block">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleThumbnailChange}
+                    className="hidden"
+                  />
+                  <div className="text-3xl mb-2 text-foreground-muted group-hover:text-foreground transition-colors">🖼️</div>
+                  <p className="text-foreground font-medium">Choose thumbnail</p>
+                </label>
+                {thumbnailPreview && (
+                  <img src={thumbnailPreview} alt="Thumbnail" className="mt-4 h-24 mx-auto rounded-lg object-cover" />
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Title *</label>
+                  <Input
+                    {...register('title')}
+                    placeholder="My Awesome Video"
+                  />
+                  {errors.title && <p className="text-destructive text-xs mt-1.5">{errors.title.message}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Description</label>
+                  <Textarea
+                    {...register('description')}
+                    placeholder="Tell us about your video..."
+                    rows="4"
+                  />
+                </div>
+              </div>
+
+              {videoProgress > 0 && (
+                <div className="bg-background-secondary rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-primary h-full transition-all duration-300"
+                    style={{ width: `${videoProgress}%` }}
+                  ></div>
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={isLoading || !videoFile}
+                className="w-full"
+                size="lg"
+              >
+                {isLoading ? 'Uploading...' : 'Upload Video'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </Container>
+    </PageLayout>
   );
 }

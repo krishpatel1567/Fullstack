@@ -2,7 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useTweetStore } from '../store/tweetStore';
 import { useAuthStore } from '../store/authStore';
 import TweetCard from '../components/TweetCard';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { Button } from '../components/ui/Button';
+import { Textarea } from '../components/ui/Input';
+import { Avatar } from '../components/ui/Avatar';
+import { PageLayout, Container, SectionHeader } from '../components/ui/Layout';
+import { EmptyState } from '../components/ui/EmptyState';
 import toast from 'react-hot-toast';
 
 export default function TweetsPage() {
@@ -34,59 +39,55 @@ export default function TweetsPage() {
   };
 
   const filteredTweets = filter === 'my' 
-    ? tweets.filter(t => t.owner?._id === user?._id)
+    ? tweets.filter(t => t.owner?._id === user?._id || t.owner === user?._id)
     : tweets;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-3xl mx-auto px-4">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">📝 Tweets Feed</h1>
+    <PageLayout>
+      <Container className="max-w-3xl">
+        <SectionHeader title="Tweets Feed" />
 
         {user && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="mb-8 border-b-2 pb-3">
             <div className="flex items-start space-x-4">
-              <div className="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center flex-shrink-0">
-                {user.avatar ? (
-                  <img src={user.avatar} alt={user.username} className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <span>{user.username?.[0]?.toUpperCase()}</span>
-                )}
-              </div>
+              <Avatar src={user.avatar} alt={user.username} />
               <div className="flex-1">
-                <textarea
+                <Textarea
                   value={newTweetContent}
                   onChange={(e) => setNewTweetContent(e.target.value)}
                   placeholder="What's happening?!"
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-lg"
-                  rows="4"
+                  className="w-full bg-transparent border-none focus:ring-0 resize-none text-base outline-none placeholder:text-foreground-muted min-h-[100px]"
                 />
-                <div className="flex justify-end mt-4 space-x-2">
-                  <button
-                    onClick={() => setNewTweetContent('')}
-                    className="px-6 py-2 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
-                  >
-                    Clear
-                  </button>
-                  <button
-                    onClick={handleCreateTweet}
-                    disabled={isPosting || !newTweetContent.trim()}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
-                  >
-                    {isPosting ? '📤 Posting...' : 'Tweet'}
-                  </button>
+                <div className="flex justify-between items-center mt-2 pt-2 border-t border-border">
+                  <div />
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setNewTweetContent('')}
+                      disabled={!newTweetContent}
+                    >
+                      Clear
+                    </Button>
+                    <Button
+                      onClick={handleCreateTweet}
+                      disabled={isPosting || !newTweetContent.trim()}
+                    >
+                      {isPosting ? 'Posting...' : 'Tweet'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        <div className="flex space-x-2 mb-6">
+        <div className="flex space-x-2 mb-6 p-1 bg-surface-hover rounded-lg w-fit">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
               filter === 'all'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                ? 'bg-background shadow-sm text-foreground'
+                : 'text-foreground-muted hover:text-foreground'
             }`}
           >
             All Tweets
@@ -94,10 +95,10 @@ export default function TweetsPage() {
           {user && (
             <button
               onClick={() => setFilter('my')}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 filter === 'my'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  ? 'bg-background shadow-sm text-foreground'
+                  : 'text-foreground-muted hover:text-foreground'
               }`}
             >
               My Tweets
@@ -107,11 +108,12 @@ export default function TweetsPage() {
 
         <div className="space-y-4">
           {isLoading ? (
-            <LoadingSpinner message="Loading tweets..." />
+            <LoadingSpinner />
           ) : filteredTweets.length === 0 ? (
-            <div className="bg-white rounded-lg p-12 text-center">
-              <p className="text-gray-500 text-lg">No tweets to show</p>
-            </div>
+            <EmptyState 
+              title="No tweets to show" 
+              description={filter === 'my' ? "You haven't posted anything yet." : "No one has posted any tweets yet."} 
+            />
           ) : (
             filteredTweets.map((tweet) => (
               <TweetCard
@@ -123,7 +125,7 @@ export default function TweetsPage() {
             ))
           )}
         </div>
-      </div>
-    </div>
+      </Container>
+    </PageLayout>
   );
 }

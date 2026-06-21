@@ -53,8 +53,30 @@ const getUserTweets = asyncHandler(async (req, res) => {
         }
     };
 
+    const pipeline = [
+        matchStage,
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner"
+            }
+        },
+        {
+            $unwind: "$owner"
+        },
+        {
+            $project: {
+                "owner.password": 0,
+                "owner.refreshToken": 0,
+                "owner.watchHistory": 0
+            }
+        }
+    ];
+
     const result = await Tweet.aggregatePaginate(
-        Tweet.aggregate([matchStage]),
+        Tweet.aggregate(pipeline),
         options
     );
 
@@ -82,8 +104,30 @@ const getAllTweets = asyncHandler(async (req,res) => {
         }
     };
 
+    const pipeline = [
+        matchStage,
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner"
+            }
+        },
+        {
+            $unwind: "$owner"
+        },
+        {
+            $project: {
+                "owner.password": 0,
+                "owner.refreshToken": 0,
+                "owner.watchHistory": 0
+            }
+        }
+    ];
+
     const result = await Tweet.aggregatePaginate(
-        Tweet.aggregate([matchStage]),
+        Tweet.aggregate(pipeline),
         options
     );
 
